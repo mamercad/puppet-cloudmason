@@ -1,0 +1,61 @@
+---
+isc_dhcpd::domain_name: cloudmason.org
+isc_dhcpd::domain_name_servers:
+  - 8.8.8.8
+  - 8.8.4.4
+isc_dhcpd::default_lease_time: 600
+isc_dhcpd::max_lease_time: 7200
+isc_dhcpd::ddns_update_style: none
+isc_dhcpd::authoritative: false
+isc_dhcpd::log_facility: local7
+isc_dhcpd::subnets:
+  - network: 10.152.187.0
+    netmask: 255.255.255.0
+  - network: 10.254.239.0
+    netmask: 255.255.255.224
+    range: 10.254.239.10 10.254.239.20
+    options:
+      - routers rtr-239-0-1.example.org, rtr-239-0-2.example.org
+  - network: 10.254.239.32
+    netmask: 255.255.255.224
+    range: dynamic-bootp 10.254.239.40 10.254.239.60
+    options:
+      - broadcast-address 10.254.239.31
+      - routers rtr-239-32-1.example.org
+  - network: 10.5.5.0
+    netmask: 255.255.255.224
+    range: 10.5.5.26 10.5.5.30
+    options:
+      - domain-name-servers ns1.internal.example.org
+      - domain-name "internal.example.org"
+      - routers 10.5.5.1
+      - broadcast-address 10.5.5.31
+    overrides:
+      - default-lease-time 600
+      - max-lease-time 7200
+isc_dhcpd::hosts:
+  - hostname: passacaglia
+    attributes:
+      - hardware ethernet 0:0:c0:5d:bd:95
+      - filename "vmunix.passacaglia"
+      - server-name "toccata.fugue.com"
+isc_dhcpd::classes:
+  - classname: foo
+    attributes:
+      - match if substring (option vendor-class-identifier, 0, 4) = "SUNW"
+isc_dhcpd::shared_networks:
+  - netname: 224-29
+    subnets:
+      - network: 10.17.224.0
+        netmask: 255.255.255.0
+        options:
+          - routers rtr-224.example.org
+      - network: 10.0.29.0
+        netmask: 255.255.255.0
+        options:
+          - routers rtr-29.example.org
+    pools:
+      - acl: allow members of "foo"
+        range: 10.17.224.10 10.17.224.25
+      - acl: deny members of "foo"
+        range: 10.0.29.10 10.0.29.230

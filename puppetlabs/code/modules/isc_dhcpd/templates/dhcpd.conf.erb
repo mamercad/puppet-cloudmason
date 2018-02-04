@@ -1,0 +1,95 @@
+# Managed by Puppet
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp*/dhcpd.conf.example
+#   see dhcpd.conf(5) man page
+#
+<% if @domain_name -%>
+option domain-name "<%= @domain_name %>";
+<% end -%>
+<% if @domain_name_servers -%>
+option domain-name-servers <%= @domain_name_servers.join(', ') %>;
+<% end -%>
+<% if @default_lease_time -%>
+default-lease-time <%= @default_lease_time %>;
+<% end -%>
+<% if @max_lease_time -%>
+max-lease-time <%= @max_lease_time %>;
+<% end -%>
+<% if @ddns_update_style -%>
+ddns-update-style <%= @ddns_update_style %>;
+<% end -%>
+<% if @authoritative -%>
+authoritative;
+<% end -%>
+<% if @log_facility -%>
+log-facility <%= @log_facility %>;
+<% end -%>
+<% if @subnets -%>
+<% @subnets.each do |subnet| -%>
+subnet <%= subnet['network'] %> netmask <%= subnet['netmask'] %> {
+<% if subnet['range'] -%>
+  range <%= subnet['range'] %>;
+<% end -%>
+<% if subnet['options'] -%>
+<% subnet['options'].each do |option| -%>
+  option <%= option %>;
+<% end -%>
+<% end -%>
+<% if subnet['overrides'] -%>
+<% subnet['overrides'].each do |override| -%>
+  <%= override %>;
+<% end -%>
+<% end -%>
+}
+<% end -%>
+<% end -%>
+<% @hosts.each do |host| -%>
+host <%= host['hostname'] %> {
+<% if host['attributes'] -%>
+<% host['attributes'].each do |attribute| -%>
+  <%= attribute %>;
+<% end -%>
+<% end -%>
+}
+<% end -%>
+<% if @classes -%>
+<% @classes.each do |classx| -%>
+class "<%= classx['classname'] %>" {
+<% if classx['attributes'] -%>
+<% classx['attributes'].each do |attribute| -%>
+  <%= attribute %>;
+<% end -%>
+<% end -%>
+}
+<% end -%>
+<% end -%>
+<% if @shared_networks -%>
+<% @shared_networks.each do |network| -%>
+shared-network <%= network['netname'] %> {
+<% if network['subnets'] -%>
+<% network['subnets'].each do |subnet| -%>
+  subnet <%= subnet['network'] %> netmask <%= subnet['netmask'] %> {
+<% if subnet['options'] -%>
+<% subnet['options'].each do |option| -%>
+    option <%= option %>;
+<% end -%>
+<% end -%>
+  }  
+<% end -%>
+<% end -%>
+<% if network['pools'] -%>
+<% network['pools'].each do |pool| -%>
+  pool {
+<% if pool['acl'] -%>
+    <%= pool['acl'] %>;
+<% end -%>
+<% if pool['range'] -%>
+    range <%= pool['range'] %>;
+<% end -%>
+  }  
+<% end -%>
+<% end -%>
+}
+<% end -%>
+<% end -%>
